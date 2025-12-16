@@ -1,0 +1,11 @@
+{
+  "name": "backoffice",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "tags": [
+      "scope:backoffice",
+      "type:app"
+    ]
+  }
+}

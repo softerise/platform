@@ -1,0 +1,17 @@
+node_modules
+dist
+coverage
+.nx/cache
+.nx/workspace-data
+*.tsbuildinfo
+pnpm-debug.log*
+.env
+.env.local
+packages/db-schema/prisma/dev.db
+vitest.config.*.timestamp*
+vite.config.*.timestamp*
+test-output
+
+node_modules
+
+.astro

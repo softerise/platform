@@ -1,0 +1,45 @@
+---
+import '../styles/global.css';
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class="bg-slate-950 text-slate-100">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="Astro + Sanity + Tailwind starter" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+
+	<body class="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 antialiased">
+		<main class="mx-auto max-w-5xl px-6 py-10">
+			<header class="mb-8 flex items-center justify-between">
+				<div>
+					<p class="text-xs uppercase tracking-[0.25em] text-indigo-400">
+						Web App
+					</p>
+					<h1 class="text-3xl font-semibold text-slate-50">Astro + Sanity + Netlify</h1>
+					<p class="text-sm text-slate-300">
+						Statik site + headless CMS içeriklerini barındıran, Netlify deploy'a hazır.
+					</p>
+				</div>
+				<a
+					class="rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-600/40 transition hover:bg-indigo-500"
+					href="https://www.netlify.com/"
+					target="_blank"
+					rel="noreferrer"
+				>
+					Netlify Deploy
+				</a>
+			</header>
+			<slot />
+		</main>
+	</body>
+</html>

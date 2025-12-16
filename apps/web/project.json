@@ -1,0 +1,38 @@
+{
+  "name": "web",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/web/src",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/apps/web"],
+      "options": {
+        "command": "pnpm exec astro build",
+        "cwd": "apps/web"
+      }
+    },
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec astro dev --host --port 4321",
+        "cwd": "apps/web"
+      }
+    },
+    "preview": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec astro preview --host --port 4322",
+        "cwd": "apps/web"
+      }
+    },
+    "check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec astro check",
+        "cwd": "apps/web"
+      }
+    }
+  },
+  "tags": ["scope:web", "type:app"]
+}

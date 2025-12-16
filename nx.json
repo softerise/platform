@@ -1,0 +1,136 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "npmScope": "project",
+  "affected": {
+    "defaultBase": "main"
+  },
+  "workspaceLayout": {
+    "appsDir": "apps",
+    "libsDir": "packages"
+  },
+  "namedInputs": {
+    "sharedGlobals": [
+      "{workspaceRoot}/package.json",
+      "{workspaceRoot}/tsconfig.base.json",
+      "{workspaceRoot}/tsconfig.json"
+    ],
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "production": [
+      "default",
+      "!{projectRoot}/**/*.spec.[jt]s",
+      "!{projectRoot}/**/*.test.[jt]s",
+      "!{projectRoot}/**/*.e2e.[jt]s",
+      "!{projectRoot}/**/*.cy.[jt]s",
+      "!{projectRoot}/test/**"
+    ]
+  },
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "nx/tasks-runners/default",
+      "options": {
+        "cacheableOperations": ["build", "lint", "test", "e2e"]
+      }
+    }
+  },
+  "targetDefaults": {
+    "lint": {
+      "inputs": ["default", "{workspaceRoot}/eslint.config.mjs"]
+    },
+    "test": {
+      "inputs": ["default", "^production"]
+    },
+    "@nxtensions/astro:build": {
+      "inputs": ["default", "^default"],
+      "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
+      "cache": true
+    },
+    "@nxtensions/astro:check": {
+      "inputs": ["default", "^default"],
+      "cache": true
+    },
+    "@nxtensions/astro:preview": {
+      "dependsOn": ["build"]
+    }
+  },
+  "generators": {
+    "@nx/react": {
+      "library": {
+        "style": "css",
+        "linter": "eslint",
+        "unitTestRunner": "vitest"
+      },
+      "application": {
+        "babel": true,
+        "style": "css",
+        "linter": "eslint",
+        "bundler": "vite"
+      },
+      "component": {
+        "style": "css"
+      }
+    }
+  },
+  "plugins": [
+    {
+      "plugin": "@nx/js/typescript",
+      "options": {
+        "typecheck": {
+          "targetName": "typecheck"
+        },
+        "build": {
+          "targetName": "build",
+          "configName": "tsconfig.lib.json",
+          "buildDepsName": "build-deps",
+          "watchDepsName": "watch-deps"
+        }
+      }
+    },
+    {
+      "plugin": "@nx/vitest",
+      "options": {
+        "testTargetName": "test",
+        "ciTargetName": "test-ci",
+        "testMode": "watch"
+      }
+    },
+    {
+      "plugin": "@nx/vite/plugin",
+      "options": {
+        "buildTargetName": "build",
+        "testTargetName": "vite:test",
+        "serveTargetName": "serve",
+        "devTargetName": "dev",
+        "previewTargetName": "preview",
+        "serveStaticTargetName": "serve-static",
+        "typecheckTargetName": "vite:typecheck",
+        "buildDepsTargetName": "vite:build-deps",
+        "watchDepsTargetName": "vite:watch-deps"
+      }
+    },
+    {
+      "plugin": "@nx/webpack/plugin",
+      "options": {
+        "buildTargetName": "build",
+        "serveTargetName": "serve",
+        "previewTargetName": "preview",
+        "buildDepsTargetName": "build-deps",
+        "watchDepsTargetName": "watch-deps",
+        "serveStaticTargetName": "serve-static"
+      }
+    },
+    {
+      "plugin": "@nx/eslint/plugin",
+      "options": {
+        "targetName": "lint"
+      }
+    },
+    {
+      "plugin": "@nx/playwright/plugin",
+      "options": {
+        "targetName": "e2e"
+      }
+    },
+    "@nxtensions/astro"
+  ],
+  "defaultProject": "web"
+}

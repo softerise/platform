@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "importHelpers": true,
+    "isolatedModules": true,
+    "lib": ["es2022"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "es2022",
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@project/contracts": ["packages/contracts/src/index.ts"],
+      "@project/events": ["packages/events/src/index.ts"],
+      "@project/db-schema": ["packages/db-schema/src/index.ts"],
+      "@project/api-dto": ["packages/api-dto/src/index.ts"],
+      "@project/api-client": ["packages/api-client/src/index.ts"],
+      "@project/ui": ["packages/ui/src/index.ts"],
+      "@project/utils": ["packages/utils/src/index.ts"],
+      "@project/infra-firebase": ["packages/infra-firebase/src/index.ts"]
+    },
+    "customConditions": ["platform"]
+  }
+}

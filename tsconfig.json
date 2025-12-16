@@ -1,0 +1,52 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compileOnSave": false,
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/contracts"
+    },
+    {
+      "path": "./packages/events"
+    },
+    {
+      "path": "./packages/db-schema"
+    },
+    {
+      "path": "./packages/api-dto"
+    },
+    {
+      "path": "./packages/api-client"
+    },
+    {
+      "path": "./packages/ui"
+    },
+    {
+      "path": "./packages/utils"
+    },
+    {
+      "path": "./packages/infra-firebase"
+    },
+    {
+      "path": "./apps/api"
+    },
+    {
+      "path": "./apps/backoffice-e2e"
+    },
+    {
+      "path": "./apps/backoffice"
+    },
+    {
+      "path": "./apps/client-e2e"
+    },
+    {
+      "path": "./apps/client"
+    },
+    {
+      "path": "./apps/web-e2e"
+    },
+    {
+      "path": "./apps/web"
+    }
+  ]
+}
