@@ -1,18 +1,17 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import tailwind from '@astrojs/tailwind';
 import { defineConfig } from 'astro/config';
+import tailwind from '@astrojs/tailwind';
+import { fileURLToPath } from 'node:url';
 
-const baseDir = fileURLToPath(new URL('.', import.meta.url));
-const resolveFromBase = (...segments) => path.resolve(baseDir, ...segments);
+const tailwindConfigFile = fileURLToPath(
+  new URL('./tailwind.config.cjs', import.meta.url),
+);
 
 export default defineConfig({
-  root: baseDir,
-  srcDir: resolveFromBase('./src'),
-  outDir: resolveFromBase('../../dist/apps/web'),
+  srcDir: './src',
+  outDir: '../../dist/apps/web',
   integrations: [
     tailwind({
-      configFile: resolveFromBase('./tailwind.config.cjs'),
+      configFile: tailwindConfigFile,
     }),
   ],
 });
