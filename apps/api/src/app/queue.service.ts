@@ -20,12 +20,20 @@ export class NotificationQueue {
       throw new Error(message);
     }
 
-    this.queue = new Queue('notifications', {
-      connection: { host, port },
-    });
-    this.logger.log(
-      `BullMQ queue initialised at redis://${host}:${port}/notifications`,
-    );
+    try {
+      this.queue = new Queue('notifications', {
+        // Lazy connect so missing Redis doesn't crash the API; queue stays disabled.
+        connection: { host, port, lazyConnect: true },
+      });
+      this.logger.log(
+        `BullMQ queue initialised at redis://${host}:${port}/notifications`,
+      );
+    } catch (error) {
+      this.logger.warn(
+        `BullMQ connection failed (${String(error)}); queue disabled for now`,
+      );
+      this.queue = undefined;
+    }
   }
 
   async publish<TPayload extends object>(

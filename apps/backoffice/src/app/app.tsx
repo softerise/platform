@@ -7,13 +7,32 @@ import { env } from '../config/env';
 const API_URL = env.VITE_API_URL;
 const queryClient = new QueryClient();
 
+const normalizeBookings = (raw: unknown): Booking[] => {
+  const list = Array.isArray(raw) ? raw : (raw as { data?: unknown })?.data;
+  if (!Array.isArray(list)) return [];
+  return list.map((item) => {
+    const booking = item as Booking & {
+      bookingDate: string | Date;
+      createdAt?: string | Date;
+      updatedAt?: string | Date;
+    };
+    return {
+      ...booking,
+      bookingDate: new Date(booking.bookingDate),
+      createdAt: new Date(booking.createdAt ?? booking.bookingDate),
+      updatedAt: new Date(booking.updatedAt ?? booking.bookingDate),
+    };
+  });
+};
+
 function BookingList() {
   const { data, isLoading, error, refetch, isRefetching } = useQuery({
     queryKey: ['bookings'],
     queryFn: async (): Promise<Booking[]> => {
       const res = await fetch(`${API_URL}/bookings`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return res.json();
+      const json = await res.json();
+      return normalizeBookings(json);
     },
   });
 
@@ -37,7 +56,7 @@ function BookingList() {
     );
   }
 
-  const bookings = data?.data ?? [];
+  const bookings = data ?? [];
 
   return (
     <Card
