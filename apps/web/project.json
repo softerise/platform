@@ -8,8 +8,7 @@
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/dist/apps/web"],
       "options": {
-        "command": "pnpm exec astro build --config ./astro.config.mjs",
-        "cwd": "apps/web"
+        "command": "cd apps/web && pnpm exec astro build"
       }
     },
     "dev": {
