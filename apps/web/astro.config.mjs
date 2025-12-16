@@ -2,9 +2,12 @@ import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 import { fileURLToPath } from 'node:url';
 
-// https://astro.build/config
+const root = fileURLToPath(new URL('.', import.meta.url));
+
 export default defineConfig({
-  outDir: '../../dist/apps/web',
+  root,
+  srcDir: fileURLToPath(new URL('./src', import.meta.url)),
+  outDir: fileURLToPath(new URL('../../dist/apps/web', import.meta.url)),
   integrations: [
     tailwind({
       configFile: fileURLToPath(
