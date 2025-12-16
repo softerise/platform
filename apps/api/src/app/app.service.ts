@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 import { SearchService } from './search.service';
+import { ConfigService } from '@nestjs/config';
+import { AppConfig } from '../config/configuration';
 
 @Injectable()
 export class AppService {
@@ -9,6 +11,7 @@ export class AppService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly search: SearchService,
+    private readonly config: ConfigService<AppConfig, true>,
   ) {}
 
   async getHealth() {
@@ -23,7 +26,7 @@ export class AppService {
     return {
       status: 'ok',
       version: process.env.npm_package_version ?? '0.0.0',
-      environment: process.env.NODE_ENV ?? 'development',
+      environment: this.config.get('nodeEnv', { infer: true }) ?? 'development',
       db,
     };
   }

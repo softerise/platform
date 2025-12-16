@@ -2,8 +2,9 @@ import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-quer
 import { Booking } from '@project/contracts';
 import { Button, Card } from '@project/ui';
 import { Route, Routes } from 'react-router-dom';
+import { env } from '../config/env';
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api';
+const API_URL = env.VITE_API_URL;
 const queryClient = new QueryClient();
 
 function BookingList() {

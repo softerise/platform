@@ -8,12 +8,19 @@ import { AppService } from './app.service';
 import { PrismaService } from './prisma.service';
 import { NotificationQueue } from './queue.service';
 import { SearchService } from './search.service';
+import { configuration, envFilePaths, validationSchema } from '../config/configuration';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env', '../../.env'],
+      envFilePath: envFilePaths,
+      load: [configuration],
+      validationSchema,
+      validationOptions: {
+        abortEarly: false,
+        allowUnknown: true,
+      },
     }),
     LoggerModule.forRoot({
       pinoHttp: {

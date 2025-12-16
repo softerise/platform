@@ -2,10 +2,12 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import path from 'node:path';
 
 export default defineConfig(() => ({
   root: import.meta.dirname,
   cacheDir: '../../node_modules/.vite/apps/client',
+  envDir: path.resolve(import.meta.dirname, '..', '..'),
   server: {
     port: 4300,
     host: 'localhost',

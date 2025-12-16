@@ -6,22 +6,20 @@
 import { NestFactory } from '@nestjs/core';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app/app.module';
+import { ConfigService } from '@nestjs/config';
+import { AppConfig } from './config/configuration';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   const logger = app.get(Logger);
+  const config = app.get(ConfigService<AppConfig, true>);
+  const nodeEnv = config.get('nodeEnv', { infer: true });
   app.useLogger(logger);
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
+  const corsOrigins = config.get('cors.origins', { infer: true });
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:4173',
-      'http://localhost:5173',
-      'http://localhost:4200',
-      'http://localhost:4300',
-      'http://localhost:4321',
-    ],
+    origin: corsOrigins?.length ? corsOrigins : true,
     credentials: true,
   });
 
@@ -37,15 +35,15 @@ async function bootstrap() {
       path: '/health',
       details: {
         version: process.env.npm_package_version ?? '0.0.0',
-        env: process.env.NODE_ENV ?? 'development',
+        env: nodeEnv ?? 'development',
       },
     }),
   );
 
-  const port = process.env.PORT || 3000;
+  const port = config.get('port', { infer: true }) ?? 3000;
   await app.listen(port);
   logger.log(
-    `🚀 API running at http://localhost:${port}/${globalPrefix} (NODE_ENV=${process.env.NODE_ENV ?? 'development'})`,
+    `🚀 API running at http://localhost:${port}/${globalPrefix} (NODE_ENV=${nodeEnv ?? 'development'})`,
   );
 }
 
