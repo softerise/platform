@@ -10,7 +10,7 @@ export class SearchService {
       const doc = new Document({ text });
       const index = await VectorStoreIndex.fromDocuments([doc]);
       const queryEngine = index.asQueryEngine();
-      const response = await queryEngine.query('Summarize');
+      const response = await queryEngine.query({ query: 'Summarize' });
       return String(response);
     } catch (error) {
       this.logger.warn(`LlamaIndex fallback: ${error}`);

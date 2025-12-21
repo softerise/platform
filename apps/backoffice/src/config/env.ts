@@ -9,7 +9,7 @@ const envSchema = z
 const parsed = envSchema.safeParse(import.meta.env);
 
 if (!parsed.success) {
-  const message = parsed.error.errors
+  const message = parsed.error.issues
     .map((issue) => `${issue.path.join('.') || 'ENV'}: ${issue.message}`)
     .join('; ');
   throw new Error(

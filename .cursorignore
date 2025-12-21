@@ -1,0 +1,28 @@
+# Add directories or file patterns to ignore during indexing (e.g. foo/ or *.csv)
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.render/
+
+# Generated / compiled
+coverage/
+.prisma/client/
+.swagger/
+openapi.json
+swagger.json
+
+# Logs & runtime noise
+logs/
+*.log
+.pino/
+.tmp/
+.cache/
+
+# IDE
+.vscode/
+.idea/

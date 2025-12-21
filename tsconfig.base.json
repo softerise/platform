@@ -21,9 +21,8 @@
     "baseUrl": ".",
     "paths": {
       "@project/contracts": ["packages/contracts/src/index.ts"],
-      "@project/events": ["packages/events/src/index.ts"],
-      "@project/db-schema": ["packages/db-schema/src/index.ts"],
-      "@project/api-dto": ["packages/api-dto/src/index.ts"],
+      "@project/db": ["packages/db/src/index.ts"],
+      "@project/schemas": ["packages/schemas/src/index.ts"],
       "@project/api-client": ["packages/api-client/src/index.ts"],
       "@project/ui": ["packages/ui/src/index.ts"],
       "@project/utils": ["packages/utils/src/index.ts"],

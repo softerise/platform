@@ -27,10 +27,9 @@ export default [
               onlyDependOnLibsWithTags: [
                 'scope:shared',
                 'scope:contracts',
-                'scope:events',
                 'scope:db',
                 'scope:infra',
-                'scope:api-dto'
+                'scope:schemas'
               ],
             },
             {
@@ -39,7 +38,7 @@ export default [
                 'scope:shared',
                 'scope:contracts',
                 'scope:api-client',
-                'scope:api-dto',
+                'scope:schemas',
                 'scope:ui'
               ],
             },
@@ -49,7 +48,7 @@ export default [
                 'scope:shared',
                 'scope:contracts',
                 'scope:api-client',
-                'scope:api-dto',
+                'scope:schemas',
                 'scope:ui'
               ],
             },
@@ -58,8 +57,8 @@ export default [
               onlyDependOnLibsWithTags: ['scope:shared', 'scope:contracts'],
             },
             {
-              sourceTag: 'scope:events',
-              onlyDependOnLibsWithTags: ['scope:contracts'],
+              sourceTag: 'scope:api-client',
+              onlyDependOnLibsWithTags: ['scope:contracts', 'scope:schemas'],
             },
             {
               sourceTag: 'scope:db',

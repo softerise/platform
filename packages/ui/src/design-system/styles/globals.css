@@ -1,0 +1,260 @@
+/**
+ * @project/ui Design System - Global Styles
+ * 
+ * KURUMSAL MİNİMAL TEMA
+ * - Light mode only
+ * - Monochrome + Single Accent (Royal Blue)
+ * - Sharp corners (4px max)
+ * - Border-focused (shadow minimal)
+ * 
+ * @usage
+ * Import in app's main CSS:
+ * @import '@project/ui/design-system/styles/globals.css';
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   CSS CUSTOM PROPERTIES (Design Tokens)
+   ============================================ */
+
+@layer base {
+  :root {
+    /* ----------------------------------------
+       COLOR TOKENS
+       ---------------------------------------- */
+    
+    /* Background & Foreground */
+    --background: 0 0% 98%;           /* #FAFAFA - Snow */
+    --foreground: 0 0% 9%;            /* #171717 - Charcoal */
+    
+    /* Card */
+    --card: 0 0% 100%;                /* #FFFFFF */
+    --card-foreground: 0 0% 9%;       /* #171717 */
+    
+    /* Popover */
+    --popover: 0 0% 100%;             /* #FFFFFF */
+    --popover-foreground: 0 0% 9%;    /* #171717 */
+    
+    /* Primary (Solid Black) */
+    --primary: 0 0% 4%;               /* #0A0A0A - Ink Black */
+    --primary-foreground: 0 0% 100%;  /* #FFFFFF */
+    
+    /* Secondary */
+    --secondary: 0 0% 96%;            /* #F5F5F5 */
+    --secondary-foreground: 0 0% 9%;  /* #171717 */
+    
+    /* Muted */
+    --muted: 0 0% 96%;                /* #F5F5F5 */
+    --muted-foreground: 0 0% 45%;     /* #737373 */
+    
+    /* Accent (Royal Blue) */
+    --accent: 217 91% 60%;            /* #2563EB */
+    --accent-foreground: 0 0% 100%;   /* #FFFFFF */
+    
+    /* Destructive */
+    --destructive: 0 84% 60%;         /* #DC2626 */
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Border & Input */
+    --border: 0 0% 90%;               /* #E5E5E5 */
+    --input: 0 0% 83%;                /* #D4D4D4 */
+    --ring: 217 91% 60%;              /* #2563EB - Focus ring */
+    
+    /* ----------------------------------------
+       SPACING & SIZING TOKENS
+       ---------------------------------------- */
+    
+    /* Border Radius - Sharp/Corporate */
+    --radius: 4px;
+    --radius-sm: 2px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    
+    /* Component Heights */
+    --height-sm: 32px;
+    --height-md: 40px;
+    --height-lg: 48px;
+    
+    /* ----------------------------------------
+       SEMANTIC COLORS
+       ---------------------------------------- */
+    
+    /* Success */
+    --success: 142 76% 36%;           /* #16A34A */
+    --success-light: 142 77% 93%;     /* #DCFCE7 */
+    --success-foreground: 0 0% 100%;
+    
+    /* Warning */
+    --warning: 45 93% 47%;            /* #CA8A04 */
+    --warning-light: 55 92% 95%;      /* #FEF9C3 */
+    --warning-foreground: 0 0% 9%;
+    
+    /* Error */
+    --error: 0 84% 60%;               /* #DC2626 */
+    --error-light: 0 86% 97%;         /* #FEE2E2 */
+    --error-foreground: 0 0% 100%;
+    
+    /* Info */
+    --info: 217 91% 60%;              /* #2563EB */
+    --info-light: 214 95% 93%;        /* #DBEAFE */
+    --info-foreground: 0 0% 100%;
+  }
+}
+
+/* ============================================
+   BASE STYLES
+   ============================================ */
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    @apply antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  
+  /* Typography Base */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight text-foreground;
+  }
+  
+  h1 { @apply text-4xl; }
+  h2 { @apply text-3xl; }
+  h3 { @apply text-2xl; }
+  h4 { @apply text-xl; }
+  h5 { @apply text-lg; }
+  h6 { @apply text-base; }
+  
+  p {
+    @apply text-base leading-relaxed;
+  }
+  
+  /* Focus States - Consistent across all interactive elements */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+/* ============================================
+   COMPONENT LAYER - Reusable Patterns
+   ============================================ */
+
+@layer components {
+  /* Page Container */
+  .page-container {
+    @apply mx-auto max-w-7xl px-6 py-8;
+  }
+  
+  /* Page Header */
+  .page-header {
+    @apply mb-8;
+  }
+  
+  .page-title {
+    @apply text-2xl font-semibold tracking-tight text-foreground;
+  }
+  
+  .page-description {
+    @apply mt-1 text-sm text-muted-foreground;
+  }
+  
+  /* Card Variants */
+  .card-corporate {
+    @apply rounded border border-border bg-card p-6;
+  }
+  
+  /* Table Styles */
+  .table-corporate {
+    @apply w-full border-collapse;
+  }
+  
+  .table-corporate thead {
+    @apply bg-muted;
+  }
+  
+  .table-corporate th {
+    @apply px-4 py-3 text-left text-sm font-medium text-muted-foreground;
+  }
+  
+  .table-corporate td {
+    @apply border-b border-border px-4 py-3 text-sm;
+  }
+  
+  .table-corporate tbody tr:hover {
+    @apply bg-muted/50;
+  }
+  
+  /* Form Styles */
+  .form-group {
+    @apply space-y-2;
+  }
+  
+  .form-label {
+    @apply text-sm font-medium text-foreground;
+  }
+  
+  .form-hint {
+    @apply text-xs text-muted-foreground;
+  }
+  
+  .form-error {
+    @apply text-xs text-destructive;
+  }
+  
+  /* Status Indicators */
+  .status-dot {
+    @apply h-2 w-2 rounded-full;
+  }
+  
+  .status-dot-success { @apply bg-[hsl(var(--success))]; }
+  .status-dot-warning { @apply bg-[hsl(var(--warning))]; }
+  .status-dot-error { @apply bg-[hsl(var(--error))]; }
+  .status-dot-info { @apply bg-[hsl(var(--info))]; }
+}
+
+/* ============================================
+   UTILITY LAYER - Custom Utilities
+   ============================================ */
+
+@layer utilities {
+  /* Text utilities */
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  /* Semantic color utilities */
+  .bg-success { @apply bg-[hsl(var(--success))]; }
+  .bg-success-light { @apply bg-[hsl(var(--success-light))]; }
+  .text-success { @apply text-[hsl(var(--success))]; }
+  
+  .bg-warning { @apply bg-[hsl(var(--warning))]; }
+  .bg-warning-light { @apply bg-[hsl(var(--warning-light))]; }
+  .text-warning { @apply text-[hsl(var(--warning))]; }
+  
+  .bg-error { @apply bg-[hsl(var(--error))]; }
+  .bg-error-light { @apply bg-[hsl(var(--error-light))]; }
+  .text-error { @apply text-[hsl(var(--error))]; }
+  
+  .bg-info { @apply bg-[hsl(var(--info))]; }
+  .bg-info-light { @apply bg-[hsl(var(--info-light))]; }
+  .text-info { @apply text-[hsl(var(--info))]; }
+  
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}

@@ -1,0 +1,1101 @@
+// ============================================================================
+// SOFTERISE PLATFORM - DATABASE SCHEMA
+// Module: User Authentication
+// Version: 1.0.0
+// Updated: 2024-12-17
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================================
+// ENUMS - Identity & Authentication
+// ============================================================================
+
+enum IdentityProvider {
+  EMAIL
+  GOOGLE
+  APPLE
+}
+
+enum UserType {
+  B2C
+  B2B
+}
+
+enum UserStatus {
+  PENDING_VERIFICATION
+  PENDING_ONBOARDING
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum B2BRole {
+  EMPLOYEE
+  TEAM_LEAD
+  HR_MANAGER
+  COMPANY_ADMIN
+}
+
+enum DeviceType {
+  IOS
+  ANDROID
+  WEB
+  UNKNOWN
+}
+
+enum SessionStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+// ============================================================================
+// ENUMS - Onboarding & Persona
+// ============================================================================
+
+enum SeniorityLevel {
+  ENTRY
+  JUNIOR
+  MID
+  SENIOR
+  LEAD
+  EXECUTIVE
+}
+
+enum QuestionType {
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  SCALE
+  TEXT
+}
+
+// ============================================================================
+// ENUMS - Company & B2B
+// ============================================================================
+
+enum CompanyStatus {
+  ACTIVE
+  SUSPENDED
+  CHURNED
+}
+
+enum InviteType {
+  EMAIL
+  LINK
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  CANCELLED
+}
+
+// ============================================================================
+// ENUMS - Admin & Audit
+// ============================================================================
+
+enum BackofficeRole {
+  SUPER_ADMIN
+  CONTENT_MANAGER
+  SUPPORT_AGENT
+  B2B_MANAGER
+  ANALYTICS_VIEWER
+}
+
+enum AdminStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum AuthEventType {
+  LOGIN_SUCCESS
+  LOGIN_FAILURE
+  LOGOUT
+  SIGNUP_STARTED
+  SIGNUP_COMPLETED
+  PASSWORD_CHANGE
+  PASSWORD_RESET_REQUEST
+  PASSWORD_RESET_COMPLETE
+  EMAIL_CHANGE_REQUEST
+  EMAIL_CHANGE_COMPLETE
+  SESSION_REVOKED
+  ALL_SESSIONS_REVOKED
+  B2B_JOIN
+  B2B_LEAVE
+  ACCOUNT_SUSPENDED
+  ACCOUNT_REACTIVATED
+  ACCOUNT_DELETE_REQUEST
+  ACCOUNT_DELETED
+  ADMIN_IMPERSONATE_START
+  ADMIN_IMPERSONATE_END
+  ONBOARDING_COMPLETED
+  ONBOARDING_UPDATED
+  GUEST_MERGE_COMPLETED
+}
+
+// ============================================================================
+// ENUMS - Book Content AI Pipeline
+// ============================================================================
+
+enum S1Verdict {
+  DIAMOND
+  GOLD
+  REJECTED
+}
+
+enum S1VerdictConfidence {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum PipelineStatus {
+  CREATED
+  RUNNING
+  PAUSED
+  WAITING_REVIEW
+  FAILED
+  STUCK
+  APPROVED
+  DEPLOYED
+  CANCELLED
+}
+
+enum PipelineStep {
+  S2_IDEA_INSPIRATION
+  S3_COURSE_OUTLINE
+  S4_EPISODE_DRAFT
+  S5_EPISODE_CONTENT
+  S6_PRACTICE_CONTENT
+  S7_FINAL_EVALUATION
+}
+
+enum StepType {
+  S1_BOOK_VERIFICATION
+  S2_IDEA_INSPIRATION
+  S3_COURSE_OUTLINE
+  S4_EPISODE_DRAFT
+  S5_EPISODE_CONTENT
+  S6_PRACTICE_CONTENT
+  S7_FINAL_EVALUATION
+}
+
+enum StepStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+  EXHAUSTED
+  SKIPPED
+}
+
+enum CourseStatus {
+  APPROVED
+  DEPLOYED
+}
+
+enum EpisodeType {
+  FOUNDATIONAL
+  CORE
+  APPLICATION
+  INTEGRATION
+}
+
+enum EpisodeStatus {
+  DRAFT
+  CONTENT_READY
+  PRODUCTION_READY
+}
+
+enum PracticeLevel {
+  BASIC
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum PracticeStakes {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum QuestionFormat {
+  IMMEDIATE_RESPONSE
+  STRATEGIC_CHOICE
+  INTERNAL_PROCESS
+  BEHAVIORAL_ACTION
+  COMMUNICATION_APPROACH
+  FOLLOW_UP
+  PERSPECTIVE_TAKING
+}
+
+enum AnswerQuality {
+  BEST
+  ACCEPTABLE
+  POOR
+}
+
+enum ReviewType {
+  IDEA_APPROVAL
+  FINAL_APPROVAL
+  STUCK_RESOLUTION
+  PARTIAL_SUCCESS_DECISION
+}
+
+enum ReviewDecision {
+  APPROVED
+  REJECTED
+  CONTINUE_PARTIAL
+  CANCEL
+  RESTART
+}
+
+// ============================================================================
+// MODEL: User (Genişletilmiş)
+// Story: S1.1.1
+// ============================================================================
+
+model User {
+  id                    String           @id @default(uuid()) @db.Uuid
+  
+  // Firebase Integration
+  firebaseUid           String?          @unique @map("firebase_uid") @db.VarChar(128)
+  
+  // Basic Info (mevcut alanlar korundu)
+  email                 String           @unique @db.VarChar(255)
+  emailVerifiedAt       DateTime?        @map("email_verified_at") @db.Timestamptz
+  displayName           String?          @map("display_name") @db.VarChar(100)
+  firstName             String?          @map("first_name") @db.VarChar(50)
+  lastName              String?          @map("last_name") @db.VarChar(50)
+  avatarUrl             String?          @map("avatar_url") @db.VarChar(500)
+  
+  // Authentication
+  identityProvider      IdentityProvider @default(EMAIL) @map("identity_provider")
+  externalIdentityId    String?          @map("external_identity_id") @db.VarChar(255)
+  
+  // User Type & Status
+  role                  String           @default("user") @db.VarChar(50)
+  userType              UserType         @default(B2C) @map("user_type")
+  status                UserStatus       @default(PENDING_VERIFICATION)
+  isActive              Boolean          @default(true) @map("is_active")
+  
+  // B2B Relations
+  companyId             String?          @map("company_id") @db.Uuid
+  b2bRole               B2BRole?         @map("b2b_role")
+  b2bJoinedAt           DateTime?        @map("b2b_joined_at") @db.Timestamptz
+  
+  // Onboarding & Persona
+  personaId             String?          @map("persona_id") @db.Uuid
+  onboardingCompletedAt DateTime?        @map("onboarding_completed_at") @db.Timestamptz
+  onboardingUpdatedAt   DateTime?        @map("onboarding_updated_at") @db.Timestamptz
+  
+  // Preferences
+  preferredLanguage     String           @default("en") @map("preferred_language") @db.VarChar(5)
+  timezone              String?          @db.VarChar(50)
+  
+  // Activity Tracking
+  lastLoginAt           DateTime?        @map("last_login_at") @db.Timestamptz
+  lastLoginIp           String?          @map("last_login_ip") @db.VarChar(45)
+  passwordChangedAt     DateTime?        @map("password_changed_at") @db.Timestamptz
+  
+  // Guest Merge
+  mergedFromGuestId     String?          @unique @map("merged_from_guest_id") @db.Uuid
+  
+  // Timestamps
+  createdAt             DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt             DateTime         @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt             DateTime?        @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  company               Company?         @relation("CompanyUsers", fields: [companyId], references: [id])
+  persona               Persona?         @relation(fields: [personaId], references: [id])
+  mergedFromGuest       Guest?           @relation("UserMergedFromGuest", fields: [mergedFromGuestId], references: [id])
+  
+  sessions              UserSession[]
+  onboardingAnswers     OnboardingAnswer[]
+  
+  invitesCreated        CompanyInvite[]  @relation("InviteCreatedBy")
+  inviteAccepted        CompanyInvite?   @relation("InviteAcceptedBy")
+
+  // Indexes
+  @@index([email])
+  @@index([firebaseUid])
+  @@index([companyId])
+  @@index([status])
+  @@index([userType])
+  @@index([personaId])
+  @@index([createdAt])
+  @@index([isActive])
+  
+  @@map("users")
+}
+
+// ============================================================================
+// MODEL: Guest (Anonymous Visitor Tracking)
+// Story: S1.1.2
+// ============================================================================
+
+model Guest {
+  id                String     @id @default(uuid()) @db.Uuid
+  
+  // Device Info
+  deviceFingerprint String?    @unique @map("device_fingerprint") @db.VarChar(255)
+  deviceType        DeviceType @map("device_type")
+  appVersion        String?    @map("app_version") @db.VarChar(20)
+  
+  // Activity Tracking
+  firstSeenAt       DateTime   @default(now()) @map("first_seen_at") @db.Timestamptz
+  lastSeenAt        DateTime   @default(now()) @map("last_seen_at") @db.Timestamptz
+  
+  // Merge Info
+  mergedToUserId    String?    @unique @map("merged_to_user_id") @db.Uuid
+  mergedAt          DateTime?  @map("merged_at") @db.Timestamptz
+  
+  // Expiry
+  expiresAt         DateTime   @map("expires_at") @db.Timestamptz
+  
+  // Timestamps
+  createdAt         DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime   @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  userMergedTo      User?      @relation("UserMergedFromGuest")
+
+  // Indexes
+  @@index([deviceFingerprint])
+  @@index([expiresAt])
+  @@index([mergedToUserId])
+  
+  @@map("guests")
+}
+
+// ============================================================================
+// MODEL: UserSession (Active Authentication Sessions)
+// Story: S1.1.3
+// ============================================================================
+
+model UserSession {
+  id              String        @id @default(uuid()) @db.Uuid
+  userId          String        @map("user_id") @db.Uuid
+  
+  // Device Info
+  deviceType      DeviceType    @map("device_type")
+  deviceName      String?       @map("device_name") @db.VarChar(100)
+  deviceId        String?       @map("device_id") @db.VarChar(255)
+  
+  // Connection Info
+  ipAddress       String?       @map("ip_address") @db.VarChar(45)
+  userAgent       String?       @map("user_agent") @db.VarChar(500)
+  
+  // Firebase Token
+  firebaseTokenId String        @map("firebase_token_id") @db.VarChar(255)
+  
+  // Status
+  status          SessionStatus @default(ACTIVE)
+  
+  // Activity
+  lastActivityAt  DateTime      @default(now()) @map("last_activity_at") @db.Timestamptz
+  expiresAt       DateTime      @map("expires_at") @db.Timestamptz
+  
+  // Revocation
+  revokedAt       DateTime?     @map("revoked_at") @db.Timestamptz
+  revokedReason   String?       @map("revoked_reason") @db.VarChar(100)
+  
+  // Timestamps
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([userId])
+  @@index([userId, status])
+  @@index([expiresAt])
+  @@index([status])
+  
+  @@map("user_sessions")
+}
+
+// ============================================================================
+// MODEL: Persona (User Profile Archetype)
+// Story: S1.1.4
+// ============================================================================
+
+model Persona {
+  id              String         @id @default(uuid()) @db.Uuid
+  
+  // Identity
+  code            String         @unique @db.VarChar(50)
+  name            String         @db.VarChar(100)
+  description     String         @db.Text
+  
+  // Attributes
+  primaryGoal     String         @map("primary_goal") @db.VarChar(200)
+  targetSeniority SeniorityLevel @map("target_seniority")
+  iconUrl         String?        @map("icon_url") @db.VarChar(500)
+  
+  // Status
+  isActive        Boolean        @default(true) @map("is_active")
+  displayOrder    Int            @default(0) @map("display_order")
+  
+  // Timestamps
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime       @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  users           User[]
+
+  // Indexes
+  @@index([isActive])
+  @@index([code])
+  
+  @@map("personas")
+}
+
+// ============================================================================
+// MODEL: OnboardingQuestion
+// Story: S1.1.4
+// ============================================================================
+
+model OnboardingQuestion {
+  id            String       @id @default(uuid()) @db.Uuid
+  
+  // Identity
+  code          String       @unique @db.VarChar(50)
+  
+  // Content
+  questionText  String       @map("question_text") @db.Text
+  questionType  QuestionType @map("question_type")
+  options       Json?        @db.JsonB
+  
+  // Configuration
+  isRequired    Boolean      @default(true) @map("is_required")
+  displayOrder  Int          @map("display_order")
+  isActive      Boolean      @default(true) @map("is_active")
+  
+  // Persona Mapping
+  personaWeight Json?        @map("persona_weight") @db.JsonB
+  
+  // Timestamps
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime     @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  answers       OnboardingAnswer[]
+
+  // Indexes
+  @@index([isActive, displayOrder])
+  @@index([code])
+  
+  @@map("onboarding_questions")
+}
+
+// ============================================================================
+// MODEL: OnboardingAnswer
+// Story: S1.1.4
+// ============================================================================
+
+model OnboardingAnswer {
+  id          String   @id @default(uuid()) @db.Uuid
+  
+  // References
+  userId      String   @map("user_id") @db.Uuid
+  questionId  String   @map("question_id") @db.Uuid
+  
+  // Answer Data
+  answerValue Json     @map("answer_value") @db.JsonB
+  
+  // Versioning
+  version     Int      @default(1)
+  isCurrent   Boolean  @default(true) @map("is_current")
+  
+  // Timestamps
+  answeredAt  DateTime @default(now()) @map("answered_at") @db.Timestamptz
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question    OnboardingQuestion @relation(fields: [questionId], references: [id])
+
+  // Constraints
+  @@unique([userId, questionId, isCurrent], name: "uq_user_question_current")
+  
+  // Indexes
+  @@index([userId])
+  @@index([questionId])
+  
+  @@map("onboarding_answers")
+}
+
+// ============================================================================
+// MODEL: Company (B2B Organization)
+// Story: S1.1.5
+// ============================================================================
+
+model Company {
+  id                  String        @id @default(uuid()) @db.Uuid
+  
+  // Identity
+  name                String        @db.VarChar(200)
+  slug                String        @unique @db.VarChar(100)
+  logoUrl             String?       @map("logo_url") @db.VarChar(500)
+  
+  // Status
+  status              CompanyStatus @default(ACTIVE)
+  
+  // Seat Management
+  seatLimit           Int           @default(10) @map("seat_limit")
+  currentSeatCount    Int           @default(0) @map("current_seat_count")
+  
+  // Default Invite
+  defaultInviteCode   String        @unique @map("default_invite_code") @db.VarChar(20)
+  
+  // Settings
+  settings            Json          @default("{}") @db.JsonB
+  
+  // Timestamps
+  createdAt           DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt           DateTime?     @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  users               User[]        @relation("CompanyUsers")
+  invites             CompanyInvite[]
+
+  // Indexes
+  @@index([status])
+  @@index([name])
+  @@index([slug])
+  
+  @@map("companies")
+}
+
+// ============================================================================
+// MODEL: CompanyInvite (B2B Membership Invitations)
+// Story: S1.1.5
+// ============================================================================
+
+model CompanyInvite {
+  id                String       @id @default(uuid()) @db.Uuid
+  
+  // Company Reference
+  companyId         String       @map("company_id") @db.Uuid
+  
+  // Invite Details
+  inviteType        InviteType   @map("invite_type")
+  inviteCode        String       @unique @map("invite_code") @db.VarChar(50)
+  email             String?      @db.VarChar(255)
+  
+  // Status
+  status            InviteStatus @default(PENDING)
+  
+  // Usage Limits (for LINK type)
+  maxUses           Int?         @map("max_uses")
+  currentUses       Int          @default(0) @map("current_uses")
+  
+  // Role Assignment
+  assignedRole      B2BRole      @default(EMPLOYEE) @map("assigned_role")
+  
+  // Creator
+  invitedByUserId   String       @map("invited_by_user_id") @db.Uuid
+  personalMessage   String?      @map("personal_message") @db.Text
+  
+  // Expiry
+  expiresAt         DateTime     @map("expires_at") @db.Timestamptz
+  
+  // Acceptance
+  acceptedByUserId  String?      @unique @map("accepted_by_user_id") @db.Uuid
+  acceptedAt        DateTime?    @map("accepted_at") @db.Timestamptz
+  
+  // Cancellation
+  cancelledAt       DateTime?    @map("cancelled_at") @db.Timestamptz
+  cancelledByUserId String?      @map("cancelled_by_user_id") @db.Uuid
+  
+  // Timestamps
+  createdAt         DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime     @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  company           Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  invitedBy         User         @relation("InviteCreatedBy", fields: [invitedByUserId], references: [id])
+  acceptedBy        User?        @relation("InviteAcceptedBy", fields: [acceptedByUserId], references: [id])
+
+  // Indexes
+  @@index([companyId])
+  @@index([inviteCode])
+  @@index([email])
+  @@index([status])
+  @@index([expiresAt])
+  
+  @@map("company_invites")
+}
+
+// ============================================================================
+// MODEL: BackofficeAdmin (Platform Administrators)
+// Story: S1.1.6
+// ============================================================================
+
+model BackofficeAdmin {
+  id            String          @id @default(uuid()) @db.Uuid
+  
+  // Firebase Integration
+  firebaseUid   String          @unique @map("firebase_uid") @db.VarChar(128)
+  
+  // Basic Info
+  email         String          @unique @db.VarChar(255)
+  displayName   String          @map("display_name") @db.VarChar(100)
+  
+  // Role & Status
+  role          BackofficeRole
+  status        AdminStatus     @default(ACTIVE)
+  
+  // Activity
+  lastLoginAt   DateTime?       @map("last_login_at") @db.Timestamptz
+  
+  // Creator
+  createdBy     String?         @map("created_by") @db.Uuid
+  
+  // Timestamps
+  createdAt     DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime        @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt     DateTime?       @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  booksCreated          Book[]           @relation("BookCreatedByAdmin")
+  bookChaptersCreated   BookChapter[]    @relation("BookChapterCreatedByAdmin")
+  pipelineRunsInitiated PipelineRun[]    @relation("PipelineRunInitiatedByAdmin")
+  reviewsPerformed      HumanReview[]    @relation("HumanReviewReviewedByAdmin")
+  coursesApproved       Course[]         @relation("CourseApprovedByAdmin")
+
+  // Indexes
+  @@index([email])
+  @@index([role])
+  @@index([status])
+  
+  @@map("backoffice_admins")
+}
+
+// ============================================================================
+// MODEL: AuthAuditLog (Immutable Authentication Event Log)
+// Story: S1.1.6
+// ============================================================================
+
+model AuthAuditLog {
+  id            String        @id @default(uuid()) @db.Uuid
+  
+  // Event Info
+  eventType     AuthEventType @map("event_type")
+  
+  // Actor References (no FK - logs must survive deletions)
+  userId        String?       @map("user_id") @db.Uuid
+  adminId       String?       @map("admin_id") @db.Uuid
+  targetUserId  String?       @map("target_user_id") @db.Uuid
+  sessionId     String?       @map("session_id") @db.Uuid
+  
+  // Request Info
+  ipAddressHash String?       @map("ip_address_hash") @db.VarChar(64)
+  userAgent     String?       @map("user_agent") @db.VarChar(500)
+  deviceType    DeviceType    @default(UNKNOWN) @map("device_type")
+  
+  // Result
+  success       Boolean
+  failureReason String?       @map("failure_reason") @db.VarChar(200)
+  
+  // Additional Data
+  metadata      Json          @default("{}") @db.JsonB
+  
+  // Timestamp (no updatedAt - immutable)
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz
+
+  // Indexes
+  @@index([userId])
+  @@index([adminId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@index([success])
+  @@index([userId, eventType, createdAt])
+  
+  @@map("auth_audit_logs")
+}
+
+// ============================================================================
+// MODEL: AccountLockout (Failed Login Attempt Tracking)
+// Story: S1.1.7
+// ============================================================================
+
+model AccountLockout {
+  id                   String    @id @default(uuid()) @db.Uuid
+  
+  // Target (by email, not user - protects non-existent accounts too)
+  email                String    @unique @db.VarChar(255)
+  
+  // Attempt Tracking
+  failedAttempts       Int       @default(0) @map("failed_attempts")
+  lastFailedAt         DateTime? @map("last_failed_at") @db.Timestamptz
+  
+  // Lock Status
+  lockedUntil          DateTime? @map("locked_until") @db.Timestamptz
+  lockLevel            Int       @default(0) @map("lock_level")
+  
+  // Email Unlock (for level 3)
+  requiresEmailUnlock  Boolean   @default(false) @map("requires_email_unlock")
+  unlockToken          String?   @map("unlock_token") @db.VarChar(100)
+  unlockTokenExpiresAt DateTime? @map("unlock_token_expires_at") @db.Timestamptz
+  
+  // Timestamps
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Indexes
+  @@index([email])
+  @@index([lockedUntil])
+  
+  @@map("account_lockouts")
+}
+
+// ============================================================================
+// MODEL: Book (Book Content AI Pipeline)
+// Story: S2.2.1
+// ============================================================================
+
+model Book {
+  id                  String              @id @default(uuid()) @db.Uuid
+  title               String              @unique @db.VarChar(255)
+  description         String?             @db.Text
+  bookLink            String?             @map("book_link") @db.VarChar(500)
+  language            String              @db.VarChar(10)
+  s1Verdict           S1Verdict?          @map("s1_verdict")
+  s1Score             Float?              @map("s1_score")
+  s1VerdictConfidence S1VerdictConfidence? @map("s1_verdict_confidence")
+  s1PrimarySpiId      String?             @map("s1_primary_spi_id") @db.VarChar(50)
+  s1PrimarySpiName    String?             @map("s1_primary_spi_name") @db.VarChar(100)
+  isPipelineEligible  Boolean             @default(false) @map("is_pipeline_eligible")
+  chaptersLocked      Boolean             @default(false) @map("chapters_locked")
+  s1Output            Json?               @map("s1_output") @db.JsonB
+  createdBy           String              @map("created_by") @db.Uuid
+  evaluatedAt         DateTime?           @map("evaluated_at") @db.Timestamptz
+  createdAt           DateTime            @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime            @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  createdByAdmin      BackofficeAdmin     @relation("BookCreatedByAdmin", fields: [createdBy], references: [id])
+  chapters            BookChapter[]
+  pipelineRun         PipelineRun?
+  courses             Course[]
+  stepExecutions      StepExecution[]
+
+  // Indexes
+  @@index([title])
+  @@index([isPipelineEligible])
+  @@index([createdBy])
+  @@index([createdAt])
+
+  @@map("books")
+}
+
+// ============================================================================
+// MODEL: BookChapter
+// Story: S2.2.2
+// ============================================================================
+
+model BookChapter {
+  id             String      @id @default(uuid()) @db.Uuid
+  bookId         String      @map("book_id") @db.Uuid
+  chapterNumber  Int         @map("chapter_number")
+  chapterTitle   String      @map("chapter_title") @db.VarChar(255)
+  content        String      @db.Text
+  wordCount      Int         @map("word_count")
+  createdBy      String      @map("created_by") @db.Uuid
+  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime    @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  book           Book        @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  createdByAdmin BackofficeAdmin @relation("BookChapterCreatedByAdmin", fields: [createdBy], references: [id])
+
+  // Constraints
+  @@unique([bookId, chapterNumber])
+
+  // Indexes
+  @@index([bookId])
+  @@index([chapterNumber])
+
+  @@map("book_chapters")
+}
+
+// ============================================================================
+// MODEL: PipelineRun
+// Story: S2.2.3
+// ============================================================================
+
+model PipelineRun {
+  id                   String          @id @default(uuid()) @db.Uuid
+  bookId               String          @map("book_id") @db.Uuid
+  status               PipelineStatus  @default(CREATED)
+  currentStep          PipelineStep?   @map("current_step")
+  currentStepNumber    Int?            @map("current_step_number")
+  totalSteps           Int             @default(7) @map("total_steps")
+  progress             Decimal         @default(0.0) @map("progress") @db.Decimal(5, 2)
+  startedAt            DateTime?       @map("started_at") @db.Timestamptz
+  completedAt          DateTime?       @map("completed_at") @db.Timestamptz
+  initiatedBy          String?         @map("initiated_by") @db.Uuid
+  revisionCount        Int             @default(0) @map("revision_count")
+  errorMessage         String?         @map("error_message") @db.Text
+  checkpointData       Json?           @map("checkpoint_data") @db.JsonB
+  configuration        Json?           @db.JsonB
+  createdAt            DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime        @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  book                 Book            @relation(fields: [bookId], references: [id])
+  initiatedByAdmin     BackofficeAdmin? @relation("PipelineRunInitiatedByAdmin", fields: [initiatedBy], references: [id])
+  steps                StepExecution[]
+  reviews              HumanReview[]
+  course               Course?
+
+  // Constraints
+  @@unique([bookId], name: "uq_pipeline_run_book")
+
+  // Indexes
+  @@index([bookId])
+  @@index([status])
+  @@index([initiatedBy])
+  @@index([startedAt])
+
+  @@map("pipeline_runs")
+}
+
+// ============================================================================
+// MODEL: StepExecution
+// Story: S2.2.4
+// ============================================================================
+
+model StepExecution {
+  id               String       @id @default(uuid()) @db.Uuid
+  pipelineRunId    String?      @map("pipeline_run_id") @db.Uuid
+  bookId           String?      @map("book_id") @db.Uuid
+  stepType         StepType     @map("step_type")
+  stepNumber       Int          @map("step_number")
+  episodeNumber    Int?         @map("episode_number")
+  status           StepStatus   @default(PENDING)
+  retryCount       Int          @default(0) @map("retry_count")
+  startedAt        DateTime?    @map("started_at") @db.Timestamptz
+  completedAt      DateTime?    @map("completed_at") @db.Timestamptz
+  durationMs       Int?         @map("duration_ms")
+  promptVersion    String?      @map("prompt_version") @db.VarChar(50)
+  llmProvider      String?      @map("llm_provider") @db.VarChar(50)
+  inputTokens      Int?         @map("input_tokens")
+  outputTokens     Int?         @map("output_tokens")
+  errorMessage     String?      @map("error_message") @db.Text
+  inputSnapshot    Json?        @map("input_snapshot") @db.JsonB
+  outputData       Json?        @map("output_data") @db.JsonB
+  createdAt        DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime     @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  pipelineRun      PipelineRun? @relation(fields: [pipelineRunId], references: [id])
+  book             Book?        @relation(fields: [bookId], references: [id])
+
+  // Indexes
+  @@index([pipelineRunId])
+  @@index([bookId])
+  @@index([stepType])
+  @@index([status])
+
+  @@map("step_executions")
+}
+
+// ============================================================================
+// MODEL: HumanReview
+// Story: S2.2.5
+// ============================================================================
+
+model HumanReview {
+  id              String           @id @default(uuid()) @db.Uuid
+  pipelineRunId   String           @map("pipeline_run_id") @db.Uuid
+  stepType        StepType         @map("step_type")
+  reviewType      ReviewType       @map("review_type")
+  decision        ReviewDecision   @map("decision")
+  reviewedBy      String           @map("reviewed_by") @db.Uuid
+  reviewedAt      DateTime         @default(now()) @map("reviewed_at") @db.Timestamptz
+  comments        String?          @db.Text
+  selectedIdeaId  String?          @map("selected_idea_id") @db.VarChar(50)
+  reviewData      Json?            @map("review_data") @db.JsonB
+  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime         @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  pipelineRun     PipelineRun      @relation(fields: [pipelineRunId], references: [id], onDelete: Cascade)
+  reviewedByAdmin BackofficeAdmin  @relation("HumanReviewReviewedByAdmin", fields: [reviewedBy], references: [id])
+
+  @@map("human_reviews")
+}
+
+// ============================================================================
+// MODEL: Course
+// Story: S2.2.6
+// ============================================================================
+
+model Course {
+  id                     String         @id @default(uuid()) @db.Uuid
+  pipelineRunId          String         @unique @map("pipeline_run_id") @db.Uuid
+  bookId                 String         @map("book_id") @db.Uuid
+  title                  String         @db.VarChar(255)
+  corePromise            String?        @map("core_promise") @db.Text
+  language               String         @db.VarChar(10)
+  totalEpisodes          Int            @map("total_episodes")
+  totalDurationMinutes   Int?           @map("total_duration_minutes")
+  totalPracticeSessions  Int?           @map("total_practice_sessions")
+  status                 CourseStatus   @default(APPROVED)
+  approvedAt             DateTime?      @map("approved_at") @db.Timestamptz
+  approvedBy             String?        @map("approved_by") @db.Uuid
+  deployedAt             DateTime?      @map("deployed_at") @db.Timestamptz
+  targetPersona          Json?          @map("target_persona") @db.JsonB
+  skillsSummary          Json?          @map("skills_summary") @db.JsonB
+  spiMapping             Json?          @map("spi_mapping") @db.JsonB
+  qualityScores          Json?          @map("quality_scores") @db.JsonB
+  metadata               Json?          @db.JsonB
+  createdAt              DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt              DateTime       @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  pipelineRun            PipelineRun    @relation(fields: [pipelineRunId], references: [id])
+  book                   Book           @relation(fields: [bookId], references: [id])
+  approvedByAdmin        BackofficeAdmin? @relation("CourseApprovedByAdmin", fields: [approvedBy], references: [id])
+  episodes               Episode[]
+  practiceSessions       PracticeSession[]
+
+  // Indexes
+  @@index([status])
+  @@index([bookId])
+  @@index([pipelineRunId])
+
+  @@map("courses")
+}
+
+// ============================================================================
+// MODEL: Episode
+// Story: S2.2.7
+// ============================================================================
+
+model Episode {
+  id                       String         @id @default(uuid()) @db.Uuid
+  courseId                 String         @map("course_id") @db.Uuid
+  episodeNumber            Int            @map("episode_number")
+  title                    String         @db.VarChar(255)
+  type                     EpisodeType    @map("type")
+  learningObjective        String?        @map("learning_objective") @db.Text
+  estimatedDurationMinutes Decimal?       @map("estimated_duration_minutes") @db.Decimal(6, 2)
+  totalWordCount           Int?           @map("total_word_count")
+  textContent              String?        @map("text_content") @db.Text
+  status                   EpisodeStatus  @default(DRAFT)
+  draftData                Json?          @map("draft_data") @db.JsonB
+  contentData              Json?          @map("content_data") @db.JsonB
+  outlineData              Json?          @map("outline_data") @db.JsonB
+  createdAt                DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt                DateTime       @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  course                   Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  // Constraints
+  @@unique([courseId, episodeNumber])
+
+  // Indexes
+  @@index([courseId])
+  @@index([episodeNumber])
+
+  @@map("episodes")
+}
+
+// ============================================================================
+// MODEL: PracticeSession
+// Story: S2.2.8
+// ============================================================================
+
+model PracticeSession {
+  id                String          @id @default(uuid()) @db.Uuid
+  courseId          String          @map("course_id") @db.Uuid
+  practiceId        Int             @map("practice_id")
+  level             PracticeLevel   @map("level")
+  levelOrder        Int             @map("level_order")
+  skillsTested      String[]        @map("skills_tested") @db.Text
+  stakes            PracticeStakes  @map("stakes")
+  scenarioSituation String?         @map("scenario_situation") @db.Text
+  scenarioContext   String?         @map("scenario_context") @db.Text
+  sessionData       Json?           @map("session_data") @db.JsonB
+  createdAt         DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime        @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  course            Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  questions         Question[]
+
+  // Indexes
+  @@index([courseId])
+  @@index([level])
+
+  @@map("practice_sessions")
+}
+
+// ============================================================================
+// MODEL: Question
+// Story: S2.2.9
+// ============================================================================
+
+model Question {
+  id                 String         @id @default(uuid()) @db.Uuid
+  practiceSessionId  String         @map("practice_session_id") @db.Uuid
+  questionId         String         @map("question_id") @db.VarChar(50)
+  questionOrder      Int            @map("question_order")
+  questionFormat     QuestionFormat @map("question_format")
+  skillFocus         String?        @map("skill_focus") @db.VarChar(100)
+  questionText       String         @map("question_text") @db.Text
+  createdAt          DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime       @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  practiceSession    PracticeSession @relation(fields: [practiceSessionId], references: [id], onDelete: Cascade)
+  answers            Answer[]
+
+  // Indexes
+  @@index([practiceSessionId])
+
+  @@map("questions")
+}
+
+// ============================================================================
+// MODEL: Answer
+// Story: S2.2.10
+// ============================================================================
+
+model Answer {
+  id            String        @id @default(uuid()) @db.Uuid
+  questionId    String        @map("question_id") @db.Uuid
+  answerId      String        @map("answer_id") @db.VarChar(50)
+  answerOrder   Int           @map("answer_order")
+  answerText    String        @map("answer_text") @db.Text
+  answerQuality AnswerQuality @map("answer_quality")
+  isCorrect     Boolean       @default(false) @map("is_correct")
+  feedback      String?       @db.Text
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  question      Question      @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([questionId])
+
+  @@map("answers")
+}
+

@@ -1,0 +1,30 @@
+{
+  "name": "@project/schemas",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
+    "./shared": {
+      "import": "./src/shared/index.ts",
+      "types": "./src/shared/index.ts"
+    },
+    "./auth": {
+      "import": "./src/auth/index.ts",
+      "types": "./src/auth/index.ts"
+    }
+  },
+  "dependencies": {
+    "zod": "^4.2.0"
+  },
+  "nx": {
+    "tags": [
+      "scope:schemas",
+      "type:source"
+    ]
+  }
+}
+

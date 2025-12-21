@@ -1,44 +1,34 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { LoggerModule } from 'nestjs-pino';
-import { BookingController } from './booking/booking.controller';
-import { BookingService } from './booking/booking.service';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { CoreModule } from '../modules/_core';
+import { AuthModule } from '../modules/auth/auth.module';
+import { LlmModule } from '../modules/llm/llm.module';
+import { BookModule } from '../modules/book/book.module';
+import { ChapterModule } from '../modules/chapter/chapter.module';
+import { PipelineModule } from '../modules/pipeline/pipeline.module';
+import { QueueModule } from '../modules/queue/queue.module';
+import { CourseModule } from '../modules/course/course.module';
+import { ReviewModule } from '../modules/review/review.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { PrismaService } from './prisma.service';
-import { NotificationQueue } from './queue.service';
 import { SearchService } from './search.service';
-import { configuration, envFilePaths, validationSchema } from '../config/configuration';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: envFilePaths,
-      load: [configuration],
-      validationSchema,
-      validationOptions: {
-        abortEarly: false,
-        allowUnknown: true,
-      },
-    }),
-    LoggerModule.forRoot({
-      pinoHttp: {
-        level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-        transport:
-          process.env.NODE_ENV === 'production'
-            ? undefined
-            : { target: 'pino-pretty', options: { singleLine: true } },
-      },
-    }),
+    ConfigModule.forRoot({ isGlobal: true }),
+    EventEmitterModule.forRoot(),
+    CoreModule,
+    AuthModule,
+    LlmModule,
+    BookModule,
+    ChapterModule,
+    PipelineModule,
+    QueueModule,
+    CourseModule,
+    ReviewModule,
   ],
-  controllers: [AppController, BookingController],
-  providers: [
-    AppService,
-    BookingService,
-    PrismaService,
-    NotificationQueue,
-    SearchService,
-  ],
+  controllers: [AppController],
+  providers: [AppService, SearchService],
 })
 export class AppModule {}

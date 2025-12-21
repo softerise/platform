@@ -16,11 +16,12 @@
   },
   "nx": {
     "tags": [
-      "scope:api-client",
-      "type:generated"
+      "type:source",
+      "scope:api-client"
     ]
   },
   "dependencies": {
+    "@project/schemas": "workspace:*",
     "tslib": "^2.3.0"
   }
 }

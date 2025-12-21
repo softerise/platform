@@ -1,6 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { sanityClient } from '../lib/sanity';
+import { fetchLatestArticles } from '../lib/sanity';
 
 type Article = {
 	_id: string;
@@ -8,15 +8,7 @@ type Article = {
 	slug?: { current: string };
 };
 
-let sanityArticles: Article[] = [];
-
-try {
-	sanityArticles = await sanityClient.fetch(
-		`*[_type == "post"] | order(_createdAt desc)[0...3]{ _id, title, slug }`,
-	);
-} catch (error) {
-	console.error('Sanity fetch failed', error);
-}
+const sanityArticles = await fetchLatestArticles<Article>();
 ---
 
 <Layout title="Astro + Sanity starter">

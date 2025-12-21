@@ -16,10 +16,7 @@
       "path": "../../packages/utils/tsconfig.lib.json"
     },
     {
-      "path": "../../packages/events/tsconfig.lib.json"
-    },
-    {
-      "path": "../../packages/db-schema/tsconfig.lib.json"
+      "path": "../../packages/db/tsconfig.lib.json"
     },
     {
       "path": "../../packages/contracts/tsconfig.lib.json"

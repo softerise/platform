@@ -3,7 +3,7 @@
  *
  * Bu içerik codegen için yer tutucudur. Gerçek client OpenAPI spec'inden üretilecektir.
  */
-import type { HealthResponse } from '@project/api-dto';
+import type { HealthResponse } from '@project/schemas';
 
 const DEFAULT_BASE_URL = 'http://localhost:3000/api';
 
